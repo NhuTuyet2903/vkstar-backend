@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+  MANAGER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  employeeId   String       @unique
+  fullName     String
+  email        String       @unique
+  password     String
+  role         Role         @default(EMPLOYEE)
+  department   String?
+  avatarUrl    String?
+  faceEmbedding Json?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  attendances  Attendance[]
+}
+
+model Attendance {
+  id           String           @id @default(uuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  checkInTime  DateTime         @default(now())
+  checkOutTime DateTime?
+  status       AttendanceStatus @default(PRESENT)
+  confidence   Float?
+  evidenceImg  String?
+  notes        String?
+  createdAt    DateTime         @default(now())
+}
